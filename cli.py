@@ -1,4 +1,3 @@
-import argparse
 from .storage import InMemoryStorage
 from .services import ToDoService
 
@@ -6,61 +5,75 @@ def main():
     storage = InMemoryStorage()
     service = ToDoService(storage)
 
-    parser = argparse.ArgumentParser(description="Simple ToDo List CLI")
-    subparsers = parser.add_subparsers(dest="command")
+    print(" Welcome to ToDo CLI (In-Memory Mode)")
+    print("Type 'help' to see commands, 'exit' to quit.")
 
-    #  Project commands 
-    create_proj = subparsers.add_parser("project-create", help="Create a new project")
-    create_proj.add_argument("--name", required=True)
-    create_proj.add_argument("--desc", default="")
+    while True:
+        cmd = input("\n> ").strip()
 
-    list_proj = subparsers.add_parser("project-list", help="List all projects")
+        if cmd == "exit":
+            print("Bye!")
+            break
 
-    delete_proj = subparsers.add_parser("project-delete", help="Delete a project by ID")
-    delete_proj.add_argument("--id", required=True)
+        elif cmd == "help":
+            print("""
+Commands:
+  project-create <name> [desc]
+  project-list
+  project-delete <id>
+  task-add <project_id> <title> [desc] [deadline]
+  task-list <project_id>
+""")
 
-    #  Task commands 
-    add_task = subparsers.add_parser("task-add", help="Add a new task to a project")
-    add_task.add_argument("--project-id", required=True)
-    add_task.add_argument("--title", required=True)
-    add_task.add_argument("--desc", default="")
-    add_task.add_argument("--deadline", default="")
+        elif cmd.startswith("project-create"):
+            parts = cmd.split(" ", 2)
+            name = parts[1] if len(parts) > 1 else input("Project name: ")
+            desc = parts[2] if len(parts) > 2 else ""
+            p = service.create_project(name, desc)
+            print(f"Created project: {p.name} (id={p.id[:8]})")
 
-    list_task = subparsers.add_parser("task-list", help="List all tasks of a project")
-    list_task.add_argument("--project-id", required=True)
+        elif cmd == "project-list":
+            projects = service.list_projects()
+            if not projects:
+                print("No projects yet.")
+            else:
+                for p in projects:
+                    print(f"{p.id[:8]} - {p.name} - {p.description}")
 
-    args = parser.parse_args()
+        elif cmd.startswith("project-delete"):
+            parts = cmd.split(" ", 1)
+            if len(parts) < 2:
+                print("Usage: project-delete <id>")
+            else:
+                service.delete_project(parts[1])
+                print("Project deleted.")
 
-    if args.command == "project-create":
-        p = service.create_project(args.name, args.desc)
-        print(f"Created project: {p.name} (id={p.id})")
+        elif cmd.startswith("task-add"):
+            parts = cmd.split(" ", 3)
+            if len(parts) < 3:
+                print("Usage: task-add <project_id> <title>")
+            else:
+                project_id, title = parts[1], parts[2]
+                desc = input("Description: ")
+                deadline = input("Deadline: ")
+                t = service.add_task(project_id, title, desc, deadline)
+                print(f"Added task: {t.title} (status={t.status})")
 
-    elif args.command == "project-list":
-        projects = service.list_projects()
-        if not projects:
-            print("No projects yet.")
-        for p in projects:
-            print(f"{p.id} - {p.name} - {p.description}")
+        elif cmd.startswith("task-list"):
+            parts = cmd.split(" ", 1)
+            if len(parts) < 2:
+                print("Usage: task-list <project_id>")
+            else:
+                tasks = service.list_tasks(parts[1])
+                if not tasks:
+                    print("No tasks.")
+                else:
+                    for t in tasks:
+                        print(f"{t.id[:8]} - {t.title} [{t.status}]")
 
-    elif args.command == "project-delete":
-        service.delete_project(args.id)
-        print("Project deleted.")
-
-    elif args.command == "task-add":
-        t = service.add_task(args.project_id, args.title, args.desc, args.deadline)
-        print(f"Added task: {t.title} (status={t.status})")
-
-    elif args.command == "task-list":
-        tasks = service.list_tasks(args.project_id)
-        if not tasks:
-            print("No tasks.")
-        for t in tasks:
-            print(f"{t.id} - {t.title} [{t.status}] (deadline: {t.deadline or '—'})")
-
-    else:
-        parser.print_help()
+        else:
+            print("Unknown command. Type 'help' to see available commands.")
 
 
 if __name__ == "__main__":
     main()
-

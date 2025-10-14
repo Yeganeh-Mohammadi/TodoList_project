@@ -11,8 +11,17 @@ class InMemoryStorage:
         self._projects[project.id] = project
 
     def get_project(self, project_id: str) -> Project:
-        #get project with id
-        return self._projects.get(project_id)
+    # Try exact match first
+        if project_id in self._projects:
+                return self._projects[project_id]
+
+    # Then try partial match (prefix)
+    for pid, project in self._projects.items():
+        if pid.startswith(project_id):
+            return project
+
+      return None
+
 
     def remove_project(self, project_id: str):
         if project_id in self._projects:
