@@ -15,9 +15,8 @@ class Task:
     updated_at: datetime = field(default_factory=datetime.utcnow)
 
     def __str__(self):
-        short_id = self.id[:8]  # show first 8 characters only
-        task_titles = ", ".join([t.title for t in self.tasks]) or "no tasks"
-        return f"📁 [{short_id}] {self.name} | Tasks: {task_titles}"
+        short_id = self.id[:8]
+        return f"[{self.status.upper()}] {self.title} (id={short_id}, deadline: {self.deadline or '—'})"
 
 
 @dataclass
@@ -31,4 +30,5 @@ class Project:
 
     def __str__(self):
         short_id = self.id[:8]
-        return f"[{self.status.upper()}] {self.title} (id={short_id}, deadline: {self.deadline or '—'})"
+        task_titles = ", ".join([t.title for t in self.tasks]) or "no tasks"
+        return f"📁 [{short_id}] {self.name} | Tasks: {task_titles}"

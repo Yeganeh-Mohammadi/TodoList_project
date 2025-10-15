@@ -1,5 +1,5 @@
-from .storage import InMemoryStorage
-from .services import ToDoService
+from storage import InMemoryStorage
+from services import ToDoService
 
 def main():
     storage = InMemoryStorage()
@@ -20,9 +20,10 @@ def main():
 Commands:
   project-create <name> [desc]
   project-list
-  project-delete <id>
-  task-add <project_id> <title> [desc] [deadline]
-  task-list <project_id>
+  project-delete <name_or_id>
+  task-add <project_name_or_id> <title> [desc] [deadline]
+  task-list <project_name_or_id>
+  task-status <name_or_id> <task_id> <new_status>
 """)
 
         elif cmd.startswith("project-create"):
@@ -43,34 +44,57 @@ Commands:
         elif cmd.startswith("project-delete"):
             parts = cmd.split(" ", 1)
             if len(parts) < 2:
-                print("Usage: project-delete <id>")
+                print("Usage: project-delete <name_or_id>")
             else:
-                service.delete_project(parts[1])
-                print("Project deleted.")
+                try:
+                    service.delete_project(parts[1])
+                    print("Project deleted.")
+                except ValueError as e:
+                    print(f"Error: {e}")
 
         elif cmd.startswith("task-add"):
             parts = cmd.split(" ", 3)
             if len(parts) < 3:
-                print("Usage: task-add <project_id> <title>")
+                print("Usage: task-add <project_name_or_id> <title>")
             else:
-                project_id, title = parts[1], parts[2]
+                project_identifier, title = parts[1], parts[2]
                 desc = input("Description: ")
                 deadline = input("Deadline: ")
-                t = service.add_task(project_id, title, desc, deadline)
-                print(f"Added task: {t.title} (status={t.status})")
+                
+                try:
+                    t = service.add_task(project_identifier, title, desc, deadline)
+                    print(f"Added task: {t.title} (status={t.status})")
+                except ValueError as e:
+                    print(f"Error: {e}")
 
         elif cmd.startswith("task-list"):
             parts = cmd.split(" ", 1)
             if len(parts) < 2:
-                print("Usage: task-list <project_id>")
+                print("Usage: task-list <project_name_or_id>")
             else:
-                tasks = service.list_tasks(parts[1])
-                if not tasks:
-                    print("No tasks.")
-                else:
-                    for t in tasks:
-                        print(f"{t.id[:8]} - {t.title} [{t.status}]")
+                project_identifier = parts[1]
+                try:
+                    tasks = service.list_tasks(project_identifier)
+                    if not tasks:
+                        print("No tasks.")
+                    else:
+                        for t in tasks:
+                            print(f"{t.id[:8]} - {t.title} [{t.status}]")
+                except ValueError as e:
+                    print(f"Error: {e}")
 
+
+        elif cmd.startswith("task-status"):
+            parts = cmd.split(" ", 3)
+            if len(parts) < 4:
+                print("Usage: task-status <project_name_or_id> <task_id_prefix> <new_status> (e.g., todo, doing, done)")
+            else:
+                project_identifier, task_id_prefix, new_status = parts[1], parts[2], parts[3]
+                try:
+                    t = service.update_task_status(project_identifier, task_id_prefix, new_status)
+                    print(f"Updated task: {t.title} to status [{t.status.upper()}]")
+                except ValueError as e:
+                    print(f"Error: {e}")
         else:
             print("Unknown command. Type 'help' to see available commands.")
 
