@@ -1,5 +1,5 @@
-from typing import Dict
-from .models import Project
+from models import Project
+from typing import Dict, Optional
 
 
 class InMemoryStorage:
@@ -10,9 +10,20 @@ class InMemoryStorage:
     def add_project(self, project: Project):
         self._projects[project.id] = project
 
-    def get_project(self, project_id: str) -> Project:
-        #get project with id
-        return self._projects.get(project_id)
+    def get_project(self, id: str) -> Optional[Project]:
+        if id in self._projects:
+            return self._projects[id]
+
+        for pid, project in self._projects.items():
+            if pid.startswith(id):
+                return project
+        
+        for project in self._projects.values():
+            if project.name.lower() == id.lower():
+                return project
+
+        return None
+
 
     def remove_project(self, project_id: str):
         if project_id in self._projects:

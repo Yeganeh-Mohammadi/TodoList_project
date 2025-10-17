@@ -1,66 +1,131 @@
-import argparse
-from .storage import InMemoryStorage
-from .services import ToDoService
+from storage import InMemoryStorage
+from services import ToDoService
 
 def main():
     storage = InMemoryStorage()
     service = ToDoService(storage)
 
-    parser = argparse.ArgumentParser(description="Simple ToDo List CLI")
-    subparsers = parser.add_subparsers(dest="command")
+    print(" Welcome to ToDo CLI (In-Memory Mode)")
+    print("Type 'help' to see commands, 'exit' to quit.")
 
-    #  Project commands 
-    create_proj = subparsers.add_parser("project-create", help="Create a new project")
-    create_proj.add_argument("--name", required=True)
-    create_proj.add_argument("--desc", default="")
+    while True:
+        cmd = input("\n> ").strip()
 
-    list_proj = subparsers.add_parser("project-list", help="List all projects")
+        if cmd == "exit":
+            print("Bye!")
+            break
 
-    delete_proj = subparsers.add_parser("project-delete", help="Delete a project by ID")
-    delete_proj.add_argument("--id", required=True)
+        elif cmd == "help":
+            print("""
+Commands:
+  project-create <name> [desc]
+  project-list
+  project-delete <name_or_id>
+  task-add <project_name_or_id> <title> [desc] [deadline]
+  task-list <project_name_or_id>
+  task-status <project_name_or_id> <task_id_or_title> <new_status>
+  task-delete <project_name_or_id> <task_id_or_title> # NEW Command
+""")
 
-    #  Task commands 
-    add_task = subparsers.add_parser("task-add", help="Add a new task to a project")
-    add_task.add_argument("--project-id", required=True)
-    add_task.add_argument("--title", required=True)
-    add_task.add_argument("--desc", default="")
-    add_task.add_argument("--deadline", default="")
+        elif cmd.startswith("project-create"):
+            parts = cmd.split(" ", 2)
+            name = parts[1] if len(parts) > 1 else input("Project name: ")
+            desc = parts[2] if len(parts) > 2 else ""
+            try:
+                p = service.create_project(name, desc)
+                print(f"Created project: {p.name} (id={p.id[:8]})")
+            except ValueError as e:
+                print(f"Error: {e}")
 
-    list_task = subparsers.add_parser("task-list", help="List all tasks of a project")
-    list_task.add_argument("--project-id", required=True)
+        elif cmd == "project-list":
+            projects = service.list_projects()
+            if not projects:
+                # AC (8) - Appropriate message [cite: 115]
+                print("No projects yet.")
+            else:
+                for p in projects:
+                    # AC (8) - Display ID, Name, Description [cite: 114]
+                    print(f"{p.id[:8]} - {p.name} - {p.description}")
 
-    args = parser.parse_args()
+        elif cmd.startswith("project-delete"):
+            parts = cmd.split(" ", 1)
+            if len(parts) < 2:
+                print("Usage: project-delete <name_or_id>")
+            else:
+                try:
+                    service.delete_project(parts[1])
+                    # AC (3) - Appropriate success message [cite: 74]
+                    print("Project and its tasks deleted successfully.")
+                except ValueError as e:
+                    print(f"Error: {e}")
 
-    if args.command == "project-create":
-        p = service.create_project(args.name, args.desc)
-        print(f"Created project: {p.name} (id={p.id})")
+        elif cmd.startswith("task-add"):
+            # Fixed logic to support [desc] and [deadline] from command line
+            parts = cmd.split(" ", 5) 
+            
+            if len(parts) < 3:
+                print("Usage: task-add <project_name_or_id> <title> [description] [deadline]")
+            else:
+                project_identifier = parts[1]
+                title = parts[2]
+                desc = parts[3] if len(parts) > 3 else ""
+                deadline = parts[4] if len(parts) > 4 else ""
+                
+                try:
+                    t = service.add_task(project_identifier, title, desc, deadline)
+                    # AC (4) - Default status is 'todo' and is displayed [cite: 87]
+                    print(f"Added task: {t.title} (status={t.status.upper()})")
+                except ValueError as e:
+                    print(f"Error: {e}")
 
-    elif args.command == "project-list":
-        projects = service.list_projects()
-        if not projects:
-            print("No projects yet.")
-        for p in projects:
-            print(f"{p.id} - {p.name} - {p.description}")
+        elif cmd.startswith("task-list"):
+            parts = cmd.split(" ", 1)
+            if len(parts) < 2:
+                print("Usage: task-list <project_name_or_id>")
+            else:
+                project_identifier = parts[1]
+                try:
+                    tasks = service.list_tasks(project_identifier)
+                    if not tasks:
+                        # AC (9) - Appropriate message [cite: 126]
+                        print("No tasks in this project.")
+                    else:
+                        for t in tasks:
+                            # AC (9) - Display ID, Title, Status, Deadline [cite: 125]
+                            print(f"[{t.status.upper()}] {t.id[:8]} - {t.title} (Deadline: {t.deadline or '—'})")
+                except ValueError as e:
+                    print(f"Error: {e}")
 
-    elif args.command == "project-delete":
-        service.delete_project(args.id)
-        print("Project deleted.")
 
-    elif args.command == "task-add":
-        t = service.add_task(args.project_id, args.title, args.desc, args.deadline)
-        print(f"Added task: {t.title} (status={t.status})")
+        elif cmd.startswith("task-status"):
+            parts = cmd.split(" ", 3)
+            if len(parts) < 4:
+                print("Usage: task-status <project_name_or_id> <task_id_or_title> <new_status> (e.g., todo, doing, done)")
+            else:
+                project_identifier, task_identifier, new_status = parts[1], parts[2], parts[3]
+                try:
+                    t = service.update_task_status(project_identifier, task_identifier, new_status)
+                    print(f"Updated task: {t.title} to status [{t.status.upper()}]")
+                except ValueError as e:
+                    print(f"Error: {e}")
+                    
+        # NEW: task-delete implementation (AC 7) 
+        elif cmd.startswith("task-delete"):
+            parts = cmd.split(" ", 2)
+            if len(parts) < 3:
+                print("Usage: task-delete <project_name_or_id> <task_id_or_title>")
+            else:
+                project_identifier, task_identifier = parts[1], parts[2]
+                try:
+                    service.delete_task(project_identifier, task_identifier)
+                    # AC (7) - Appropriate success message [cite: 109]
+                    print(f"Task '{task_identifier}' deleted successfully.")
+                except ValueError as e:
+                    print(f"Error: {e}")
 
-    elif args.command == "task-list":
-        tasks = service.list_tasks(args.project_id)
-        if not tasks:
-            print("No tasks.")
-        for t in tasks:
-            print(f"{t.id} - {t.title} [{t.status}] (deadline: {t.deadline or '—'})")
-
-    else:
-        parser.print_help()
+        else:
+            print("Unknown command. Type 'help' to see available commands.")
 
 
 if __name__ == "__main__":
     main()
-
