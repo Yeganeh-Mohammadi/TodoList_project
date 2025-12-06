@@ -1,10 +1,11 @@
 [tool.poetry]
 name = "todo-list"
 version = "0.1.0"
-description = "Todo List project - Phase 2 with RDB, SQLAlchemy, Alembic"
-authors = ["Your Name <you@example.com>"]
+description = "Todo List project - Phase 2 with RDB"
+authors = ["Your Name <email@example.com>"]
 readme = "README.md"
-packages = [{include = "TodoList_project"}]
+package-mode = false
+
 [tool.poetry.dependencies]
 python = "^3.10"
 SQLAlchemy = "^2.0"
