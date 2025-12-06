@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "todo-list"
+version = "0.1.0"
+description = "Todo List project - Phase 2 with RDB, SQLAlchemy, Alembic"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "TodoList_project"}]
+[tool.poetry.dependencies]
+python = "^3.10"
+SQLAlchemy = "^2.0"
+alembic = "^1.13"
+python-dotenv = "^1.0"
+psycopg2-binary = "^2.9"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
