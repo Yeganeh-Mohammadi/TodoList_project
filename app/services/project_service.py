@@ -22,13 +22,13 @@ class ProjectService:
     def get_all_projects(self) -> List[Project]:
         return self.project_repo.get_all()
 
-    def get_project_by_id(self, project_id: int) -> Project:
+    def get_project_by_id(self, project_id: str) -> Project:
         project = self.project_repo.get_by_id(project_id)
         if not project:
             raise ValueError(f"Project with ID {project_id} not found.")
         return project
 
-    def delete_project(self, project_id: int) -> None:
+    def delete_project(self, project_id: str) -> None:
         project = self.get_project_by_id(project_id)
         # Cascade delete is handled by ORM setup (in app/models/project.py)
         self.project_repo.delete(project)

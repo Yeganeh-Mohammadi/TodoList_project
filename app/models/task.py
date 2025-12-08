@@ -22,8 +22,8 @@ class Task(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     closed_at = Column(DateTime, nullable=True)  # برای تسک‌های بسته شده
     
-    # کلید خارجی به Project
-    project_id = Column(String(36), ForeignKey("projects.id"), nullable=False)
+    # کلید خارجی به Project (با cascade delete در سطح دیتابیس)
+    project_id = Column(String(36), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
     project = relationship("Project", back_populates="tasks")
     
     def __repr__(self):
