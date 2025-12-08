@@ -1,20 +1,20 @@
 [tool.poetry]
-name = "todo-list"
+name = "todolist-project"
 version = "0.1.0"
-description = "Todo List project - Phase 2 with RDB"
-authors = ["Your Name <email@example.com>"]
+description = ""
+authors = ["Your Name <you@example.com>"]
+license = "MIT"
 readme = "README.md"
-package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.10"
-SQLAlchemy = "^2.0"
-alembic = "^1.13"
-python-dotenv = "^1.0"
-psycopg2-binary = "^2.9"
+python="^3.14"
+sqlalchemy = "^2.0.23"
+psycopg2-binary = "^2.9.9"
+python-dotenv = "^1.0.0"
+alembic = "^1.17.2"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.0"
+alembic = "^1.13.0"
 
 [build-system]
 requires = ["poetry-core"]
