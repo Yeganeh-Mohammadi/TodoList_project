@@ -59,7 +59,7 @@ def project_list():
     except Exception as e:
         print(f"Error: {e}")
 
-def project_delete(project_id: str):
+def project_delete(project_id: int):
     """Delete a project (tasks will be automatically deleted)"""
     try:
         with get_db() as db:
@@ -80,7 +80,7 @@ def project_delete(project_id: str):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-def project_show(project_id: str):
+def project_show(project_id: int):
     """Show project details and its tasks"""
     try:
         with get_db() as db:

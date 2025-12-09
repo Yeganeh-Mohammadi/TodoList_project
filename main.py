@@ -66,14 +66,14 @@ def main():
                 print("Error: project_id is required")
                 print("Usage: python main.py project delete <project_id>")
                 return
-            project_id = sys.argv[3]
+            project_id = int(sys.argv[3])
             project_delete(project_id)
         elif subcommand == "show":
             if len(sys.argv) < 4:
                 print("Error: project_id is required")
                 print("Usage: python main.py project show <project_id>")
                 return
-            project_id = sys.argv[3]
+            project_id = int(sys.argv[3])
             project_show(project_id)
         else:
             print(f"Error: Invalid command: '{subcommand}'")
@@ -93,12 +93,12 @@ def main():
                 print("Usage: python main.py task create <title> <project_id> [description] [deadline]")
                 return
             title = sys.argv[3]
-            project_id = sys.argv[4]
+            project_id = int(sys.argv[4])
             description = sys.argv[5] if len(sys.argv) > 5 else None
             deadline = sys.argv[6] if len(sys.argv) > 6 else None
             task_create(title, project_id, description, deadline)
         elif subcommand == "list":
-            project_id = sys.argv[3] if len(sys.argv) > 3 else None
+            project_id = int(sys.argv[3]) if len(sys.argv) > 3 else None
             task_list(project_id)
         elif subcommand == "update-status":
             if len(sys.argv) < 5:
@@ -106,7 +106,7 @@ def main():
                 print("Usage: python main.py task update-status <task_id> <status>")
                 print("   status can be: todo, doing, done")
                 return
-            task_id = sys.argv[3]
+            task_id = int(sys.argv[3])
             status = sys.argv[4]
             task_update_status(task_id, status)
         elif subcommand == "delete":
@@ -114,14 +114,14 @@ def main():
                 print("Error: task_id is required")
                 print("Usage: python main.py task delete <task_id>")
                 return
-            task_id = sys.argv[3]
+            task_id = int(sys.argv[3])
             task_delete(task_id)
         elif subcommand == "show":
             if len(sys.argv) < 4:
                 print("Error: task_id is required")
                 print("Usage: python main.py task show <task_id>")
                 return
-            task_id = sys.argv[3]
+            task_id = int(sys.argv[3])
             task_show(task_id)
         elif subcommand == "schedule":
             if len(sys.argv) < 5:
@@ -129,7 +129,7 @@ def main():
                 print("Usage: python main.py task schedule <task_id> <deadline>")
                 print("   deadline format: YYYY-MM-DD or YYYY-MM-DD HH:MM")
                 return
-            task_id = sys.argv[3]
+            task_id = int(sys.argv[3])
             deadline = sys.argv[4]
             task_schedule(task_id, deadline)
         else:

@@ -30,7 +30,7 @@ def parse_datetime(date_string: str) -> datetime:
     
     raise ValueError(f"Invalid date format: {date_string}. Valid format: YYYY-MM-DD or YYYY-MM-DD HH:MM")
 
-def task_create(title: str, project_id: str, description: str = None, deadline: str = None):
+def task_create(title: str, project_id: int, description: str = None, deadline: str = None):
     """Create a new task"""
     try:
         deadline_dt = None
@@ -50,7 +50,7 @@ def task_create(title: str, project_id: str, description: str = None, deadline: 
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-def task_list(project_id: str = None):
+def task_list(project_id: int = None):
     """List tasks"""
     try:
         with get_db() as db:
@@ -75,6 +75,9 @@ def task_list(project_id: str = None):
                 emoji = status_emoji.get(task.status.value, "📋")
                 print(f"\n{i}. {emoji} {task.title} (ID: {task.id})")
                 print(f"   Status: {task.status.value}")
+                # Display project name
+                if task.project:
+                    print(f"   Project: {task.project.name} (ID: {task.project.id})")
                 if task.description:
                     print(f"   Description: {task.description}")
                 if task.deadline:
@@ -89,7 +92,7 @@ def task_list(project_id: str = None):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-def task_update_status(task_id: str, status_str: str):
+def task_update_status(task_id: int, status_str: str):
     """Update task status"""
     try:
         # Convert string to enum
@@ -109,8 +112,20 @@ def task_update_status(task_id: str, status_str: str):
         
         with get_db() as db:
             project_service, task_service = setup_services(db)
+            
+            # Get task before update to show old status
+            task_before = task_service.get_task_by_id(task_id)
+            old_status = task_before.status.value
+            
+            # Update status
             task = task_service.update_task_status(task_id, status)
-            print(f"Success: Task '{task.title}' status changed to '{status.value}'!")
+            
+            # Display result
+            print(f"Success: Task '{task.title}' status updated!")
+            print(f"   Previous status: {old_status}")
+            print(f"   New status: {status.value}")
+            if task.project:
+                print(f"   Project: {task.project.name} (ID: {task.project.id})")
             if status == TaskStatus.DONE and task.closed_at:
                 print(f"   Closed at: {task.closed_at.strftime('%Y-%m-%d %H:%M:%S')}")
     except ValueError as e:
@@ -118,7 +133,7 @@ def task_update_status(task_id: str, status_str: str):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-def task_delete(task_id: str):
+def task_delete(task_id: int):
     """Delete a task"""
     try:
         with get_db() as db:
@@ -132,7 +147,7 @@ def task_delete(task_id: str):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-def task_show(task_id: str):
+def task_show(task_id: int):
     """Show task details"""
     try:
         with get_db() as db:
@@ -165,7 +180,7 @@ def task_show(task_id: str):
     except Exception as e:
         print(f"Unexpected error: {e}")
 
-def task_schedule(task_id: str, deadline: str):
+def task_schedule(task_id: int, deadline: str):
     """Set or update task deadline"""
     try:
         deadline_dt = parse_datetime(deadline)
