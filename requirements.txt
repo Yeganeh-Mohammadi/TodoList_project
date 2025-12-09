@@ -1,0 +1,13 @@
+# TodoList Project Dependencies
+# Install with: pip install -r requirements.txt
+
+# Database
+sqlalchemy>=2.0.23
+psycopg2-binary>=2.9.9
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Database Migrations
+alembic>=1.17.2
+
