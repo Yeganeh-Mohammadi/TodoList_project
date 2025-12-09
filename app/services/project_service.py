@@ -28,6 +28,23 @@ class ProjectService:
             raise ValueError(f"Project with ID {project_id} not found.")
         return project
 
+    def update_project(self, project_id: int, name: str = None, description: str = None) -> Project:
+        """به‌روزرسانی پروژه"""
+        project = self.get_project_by_id(project_id)
+        
+        # بررسی تکراری نبودن نام (اگر name تغییر کرده باشد)
+        if name and name != project.name:
+            if self.project_repo.get_by_name(name):
+                raise ValueError(f"Project with name '{name}' already exists.")
+        
+        update_data = {}
+        if name is not None:
+            update_data["name"] = name
+        if description is not None:
+            update_data["description"] = description
+        
+        return self.project_repo.update(project, update_data)
+
     def delete_project(self, project_id: int) -> None:
         project = self.get_project_by_id(project_id)
         # Cascade delete is handled by ORM setup (in app/models/project.py)

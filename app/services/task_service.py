@@ -39,6 +39,34 @@ class TaskService:
         """تسک‌های یک پروژه را برمی‌گرداند"""
         return self.task_repo.list_by_project(project_id)
 
+    def update_task(
+        self, 
+        task_id: int, 
+        title: str = None, 
+        description: str = None, 
+        deadline: datetime = None, 
+        status: TaskStatus = None
+    ) -> Task:
+        """به‌روزرسانی تسک"""
+        task = self.get_task_by_id(task_id)
+        
+        update_data = {}
+        if title is not None:
+            update_data["title"] = title
+        if description is not None:
+            update_data["description"] = description
+        if deadline is not None:
+            update_data["deadline"] = deadline
+        if status is not None:
+            update_data["status"] = status
+            # اگر status به DONE تغییر کرد، closed_at را تنظیم کن
+            if status == TaskStatus.DONE and task.status != TaskStatus.DONE:
+                update_data["closed_at"] = datetime.utcnow()
+            elif status != TaskStatus.DONE:
+                update_data["closed_at"] = None
+        
+        return self.task_repo.update(task, update_data)
+
     def update_task_status(self, task_id: int, status: TaskStatus) -> Task:
         """به‌روزرسانی وضعیت تسک"""
         task = self.get_task_by_id(task_id)
