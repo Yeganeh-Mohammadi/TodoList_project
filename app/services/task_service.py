@@ -12,7 +12,7 @@ class TaskService:
 
     # --- CRUD Operations ---
 
-    def create_task(self, title: str, project_id: str, description: str = None, deadline: datetime = None) -> Task:
+    def create_task(self, title: str, project_id: int, description: str = None, deadline: datetime = None) -> Task:
         # Business logic: Check if project exists
         if not self.project_repo.get_by_id(project_id):
             raise ValueError(f"Project with ID {project_id} not found.")
@@ -25,7 +25,7 @@ class TaskService:
         }
         return self.task_repo.create(task_data)
     
-    def get_task_by_id(self, task_id: str) -> Task:
+    def get_task_by_id(self, task_id: int) -> Task:
         task = self.task_repo.get_by_id(task_id)
         if not task:
             raise ValueError(f"Task with ID {task_id} not found.")
@@ -35,11 +35,11 @@ class TaskService:
         """همه تسک‌ها را برمی‌گرداند"""
         return self.task_repo.get_all()
 
-    def get_tasks_by_project(self, project_id: str) -> List[Task]:
+    def get_tasks_by_project(self, project_id: int) -> List[Task]:
         """تسک‌های یک پروژه را برمی‌گرداند"""
         return self.task_repo.list_by_project(project_id)
 
-    def update_task_status(self, task_id: str, status: TaskStatus) -> Task:
+    def update_task_status(self, task_id: int, status: TaskStatus) -> Task:
         """به‌روزرسانی وضعیت تسک"""
         task = self.get_task_by_id(task_id)
         
@@ -51,11 +51,11 @@ class TaskService:
             
         return self.task_repo.update(task, update_data)
 
-    def mark_task_as_done(self, task_id: str) -> Task:
+    def mark_task_as_done(self, task_id: int) -> Task:
         """علامت‌گذاری تسک به عنوان انجام شده"""
         return self.update_task_status(task_id, TaskStatus.DONE)
 
-    def delete_task(self, task_id: str) -> None:
+    def delete_task(self, task_id: int) -> None:
         """حذف تسک"""
         task = self.get_task_by_id(task_id)
         self.task_repo.delete(task)

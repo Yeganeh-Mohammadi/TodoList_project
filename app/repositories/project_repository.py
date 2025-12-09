@@ -20,7 +20,7 @@ class ProjectRepository:
         self.db.refresh(project)
         return project
     
-    def get_by_id(self, project_id: str) -> Optional[Project]:
+    def get_by_id(self, project_id: int) -> Optional[Project]:
         return self.db.query(Project).filter(Project.id == project_id).first()
     
     def get_by_name(self, name: str) -> Optional[Project]:

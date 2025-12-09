@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from datetime import datetime
 
 from app.models.task import Task, TaskStatus
@@ -25,19 +25,33 @@ class TaskRepository(BaseRepository[Task]):
         self.db.refresh(task)
         return task
 
-    def get_by_id(self, task_id: str) -> Optional[Task]:
-        return self.db.query(Task).filter(Task.id == task_id).first()
-
-    def get_all(self) -> List[Task]:
-        """همه تسک‌ها را برمی‌گرداند"""
-        return self.db.query(Task).all()
-
-    def list_all(self) -> List[Task]:
-        return self.db.query(Task).all()
-
-    def list_by_project(self, project_id: str) -> List[Task]:
+    def get_by_id(self, task_id: int) -> Optional[Task]:
         return (
             self.db.query(Task)
+            .options(joinedload(Task.project))
+            .filter(Task.id == task_id)
+            .first()
+        )
+
+    def get_all(self) -> List[Task]:
+        """همه تسک‌ها را برمی‌گرداند (با eager loading برای project)"""
+        return (
+            self.db.query(Task)
+            .options(joinedload(Task.project))
+            .all()
+        )
+
+    def list_all(self) -> List[Task]:
+        return (
+            self.db.query(Task)
+            .options(joinedload(Task.project))
+            .all()
+        )
+
+    def list_by_project(self, project_id: int) -> List[Task]:
+        return (
+            self.db.query(Task)
+            .options(joinedload(Task.project))
             .filter(Task.project_id == project_id)
             .all()
         )
@@ -61,6 +75,7 @@ class TaskRepository(BaseRepository[Task]):
         now = datetime.utcnow()
         return (
             self.db.query(Task)
+            .options(joinedload(Task.project))
             .filter(
                 Task.deadline < now,
                 Task.status != TaskStatus.DONE
