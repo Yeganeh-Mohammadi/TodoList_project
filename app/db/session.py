@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 import os
@@ -11,7 +11,14 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set. Please create a .env file with DATABASE_URL.")
 
-engine = create_engine(DATABASE_URL)
+# ایجاد engine با تنظیمات بهینه
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,  # بررسی اتصال قبل از استفاده
+    pool_recycle=3600,   # بازیابی اتصال بعد از 1 ساعت
+    echo=False           # برای debug می‌توان True کرد
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 @contextmanager
