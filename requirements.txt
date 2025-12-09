@@ -11,3 +11,7 @@ python-dotenv>=1.0.0
 # Database Migrations
 alembic>=1.17.2
 
+# FastAPI and ASGI Server
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+
