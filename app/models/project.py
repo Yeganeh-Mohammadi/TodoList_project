@@ -1,13 +1,13 @@
-from sqlalchemy import Column, String, DateTime, Text
+from sqlalchemy import Column, String, DateTime, Text, Integer, Sequence
 from sqlalchemy.orm import relationship
-import uuid
 from datetime import datetime
 from ..db.base import Base
 
 class Project(Base):
     __tablename__ = "projects"
     
-    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    # Integer autoincrement ID starting from 1 (using Sequence for PostgreSQL)
+    id = Column(Integer, Sequence('projects_id_seq'), primary_key=True)
     name = Column(String(100), nullable=False, unique=True)
     description = Column(Text, default="")
     created_at = Column(DateTime, default=datetime.utcnow)
